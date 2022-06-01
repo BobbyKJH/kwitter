@@ -1,26 +1,28 @@
 import React from "react";
-import { HashRouter as Router, Switch, Route } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+// import styled from "styled-components";
 import Auth from "../routers/Auth";
 import Home from "../routers/Home";
+import Profile from "../routers/Profile";
+import Navigation from "./Navigation";
 
-function AppRouter({ isLogIn }) {
+function AppRouter({ isLogIn, userObj }) {
   return (
     <Router>
-      <Switch>
+      {isLogIn && <Navigation />}
+      <Routes>
         {isLogIn ? (
           <>
-            <Route exact path="/">
-              {/* 홈 화면 */}
-              <Home />
-            </Route>
+            <Route exact path="/" element={<Home userObj={userObj} />} />
+
+            <Route exact path="/profile" element={<Profile />} />
           </>
         ) : (
-          <Route exact path="/">
-            {/* 로그인 화면 */}
-            <Auth />
-          </Route>
+          <>
+            <Route exact path="/" element={<Auth />} />
+          </>
         )}
-      </Switch>
+      </Routes>
     </Router>
   );
 }

@@ -1,38 +1,54 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import styled from "styled-components";
-import { authService } from "../myBase";
+import { authService, firebaseInstance } from "../myBase";
 
+// 전체 박스
 const Container = styled.div`
-  display: block;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
   margin: 0 auto;
   border: 5px solid black;
   width: 600px;
   height: 500px;
 `;
 
-// form style
+// form csss
 const Form = styled.form`
   margin: 0 auto;
 `;
 
-// input style
+// input css
 const Input = styled.input`
   box-sizing: border-box;
   display: block;
   margin: 0 auto;
   width: 300px;
   height: 30px;
+  &:focus {
+    border: 3px solid #3d3d;
+  }
 `;
 
-// LogInBtn
+// LogInBtn css
 const LogInBtn = styled.input`
   box-sizing: border-box;
   display: block;
+  border: none;
   margin: 0 auto;
   width: 300px;
   height: 30px;
 `;
 
+// 깃헙 구글 로그인
+const OtherLogIn = styled.button`
+  display: inline-block;
+  box-sizing: border-box;
+  width: 150px;
+  height: 30px;
+`;
+// 로그인 회원가입 선택 버튼 css
 const SelectSign = styled.button`
   display: block;
   margin: 0 auto;
@@ -44,7 +60,8 @@ function Auth() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [newAccount, setNewAccount] = useState(false);
-  const [error, setError] = useState("  ");
+  const [error, setError] = useState("");
+  const idRef = useRef(null);
 
   // email 과 password onChange
   const onChange = (e) => {
@@ -58,12 +75,6 @@ function Auth() {
       setPassword(value);
     }
   };
-
-  const Cotainer = styled.div`
-    display: block;
-    width: 600px;
-    height: 700px;
-  `;
 
   // form onSubmit
   const onSubmit = async (e) => {
@@ -88,9 +99,30 @@ function Auth() {
     }
   };
 
+  // 회원가입 or 로그인 화면 선택
   const Sign = () => {
     setNewAccount((prev) => !prev);
   };
+
+  //구글 & 깃헙 로그인
+  const onSocailClick = async (e) => {
+    const {
+      target: { name },
+    } = e;
+    let provider;
+    if (name === "google") {
+      provider = new firebaseInstance.auth.GoogleAuthProvider();
+    } else if (name === "github") {
+      provider = new firebaseInstance.auth.GithubAuthProvider();
+    }
+    const data = await authService.signInWithPopup(provider);
+    console.log(data);
+  };
+
+  // 렌더링 focus email
+  useEffect(() => {
+    idRef.current.focus();
+  }, []);
 
   return (
     <Container>
@@ -103,7 +135,9 @@ function Auth() {
           required
           value={email}
           onChange={onChange}
+          ref={idRef}
         />
+        {/* 패스워드 입력 */}
         <Input
           name="password"
           type="password"
@@ -112,12 +146,25 @@ function Auth() {
           value={password}
           onChange={onChange}
         />
+        {/* 로그인 회원가입 버튼 */}
         <LogInBtn type="submit" value={newAccount ? "회원가입" : "로그인"} />
         {error}
-        <SelectSign onClick={Sign}>
-          {newAccount ? "로그인 하러 가기" : "회원가입"}
-        </SelectSign>
       </Form>
+
+      {/* 로그인 & 회원가입 버튼 */}
+      <SelectSign onClick={Sign}>
+        {newAccount ? "로그인" : "회원가입"}
+      </SelectSign>
+
+      {/* 깃헙 & 구글  */}
+      <div>
+        <OtherLogIn name="google" onClick={onSocailClick}>
+          Google
+        </OtherLogIn>
+        <OtherLogIn name="github" onClick={onSocailClick}>
+          Github
+        </OtherLogIn>
+      </div>
     </Container>
   );
 }

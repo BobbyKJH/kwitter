@@ -13,12 +13,14 @@ function App() {
 
   const [init, setInit] = useState(false);
   const [isLogIn, setIsLogIn] = useState(false);
+  const [userObj, setUserObj] = useState(null);
 
   // Login
   useEffect(() => {
     authService.onAuthStateChanged((user) => {
       if (user) {
         setIsLogIn(true);
+        setUserObj(user);
       } else {
         setIsLogIn(false);
       }
@@ -27,7 +29,11 @@ function App() {
   });
   return (
     <>
-      {init ? <AppRouter isLogIn={isLogIn} /> : <Loading>Loading...</Loading>}
+      {init ? (
+        <AppRouter isLogIn={isLogIn} userObj={userObj} />
+      ) : (
+        <Loading>Loading...</Loading>
+      )}
     </>
   );
 }
